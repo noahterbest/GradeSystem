@@ -104,28 +104,36 @@ public class GradeTracker {
     }
 
     private static void saveData() {
-        try {
-            FileOutputStream fos = new FileOutputStream("grades.txt");
-            ObjectOutputStream oos = new ObjectOutputStream(fos);
-            oos.writeObject(grades);
-            oos.close();
-            fos.close();
-            System.out.println("Data saved to grades.txt");
-        } catch (IOException e) {
-            e.printStackTrace();
+        try (PrintWriter out = new PrintWriter(new File("grades.csv"))) {
+
+            out.println("Student,Grade");
+            for(int i=0; i<studentNames.size(); i++) {
+                out.println(studentNames.get(i) + "," + grades.get(i));
+            }
+
+            System.out.println("Data saved to grades.csv");
+
+        } catch (FileNotFoundException e) {
+            System.out.println("Error saving grades data: " + e.getMessage());
         }
     }
 
     private static void loadData() {
-        try {
-            FileInputStream fis = new FileInputStream("grades.txt");
-            ObjectInputStream ois = new ObjectInputStream(fis);
-            grades = (ArrayList) ois.readObject();
-            ois.close();
-            fis.close();
-            System.out.println("Data loaded from grades.txt");
-        } catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace();
+        try (Scanner scanner = new Scanner(new File("grades.csv"));){
+
+            scanner.nextLine(); // skip header row
+
+            while(scanner.hasNextLine()){
+                String line = scanner.nextLine();
+                String[] values = line.split(",");
+                studentNames.add(values[0]);
+                grades.add(Double.parseDouble(values[1]));
+            }
+
+            System.out.println("Data loaded from grades.csv");
+
+        } catch (FileNotFoundException e) {
+            System.out.println("Error loading grades data: " + e.getMessage());
         }
     }
 }
